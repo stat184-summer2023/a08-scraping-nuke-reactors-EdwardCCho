@@ -1,6 +1,6 @@
 ---
 title: "Activity: Nuclear Reactors"
-author: "YOUR NAME HERE"
+author: "Edward Cho"
 output: html_notebook
 ---
 
@@ -13,22 +13,51 @@ library(tidyverse)
 
 ```{r}
 #My code here.... 
+#install.packages("rvest")
+library("rvest")
 
+page <- "https://en.wikipedia.org/wiki/List_of_commercial_nuclear_reactors"
 
+table_list <- page %>%
+  read_html(header = TRUE) %>%
+  html_nodes(css = "table") %>%
+  html_table(fill = TRUE)
+
+#str(table_list)
 ```
 
 
 ## Your turn: In what ways is the table tidy? How is it not tidy? What’s different about it from a tidy table?
 
 My answer here..... 
+The tables are somewhat tidy because they are separated with the related variables. However, the attributes are displaying every piece of code to make the attribute's titles fancy on Wikipedia, meaning that the attribute has a lot or some words that do not need to be included for the sake of information.
 
 
 ## Your Turn: Plot Net Generation Capacity vs Construction Date
 
 ```{r}
-#my code here 
+#my code here
+JapanRecords = table_list[[21]][ , 1:9]
+#str(JapanRecords)
 
-
+Japan <-
+  JapanRecords %>%
+  filter(row_number() > 1) %>%
+  rename(name = 'Plantname', 
+         reactor = 'UnitNo.',
+         model = 'Model',
+         status = 'Status', 
+         netMW = 'Capacity(MW)',
+         construction = 'Beginbuilding',
+         operation = 'Commercialoperation', 
+         closure = 'Closed')
+# NGC = Net Generation Capacity
+# CD = Construction Date
+JapanNGCvsCD <-
+  JapanRecords %>%
+  summarise( cases = n(),
+             NGC = sum( Capacity(MW), na.rm = TRUE ),
+             CD = mean( Beginbuilding, na.rm = TRUE ))
 ```
 
 
